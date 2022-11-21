@@ -103,7 +103,7 @@ std::string fetchFileConsumers(std::string groupName, std::string fileName){
 
     if (fileConsumers.size() > 0)
         response.pop_back();
-
+    std::cout<<response<<std::endl;
     return response;
 
 }

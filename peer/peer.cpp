@@ -241,7 +241,7 @@ int main(int argc, char ** argv){
                 // fgets(filePath, MAXFILEPATHSIZE, stdin);
 
                 //cin >> filePathString >> groupName; 
-                 filePathString = "/home/aditya/Downloads/message.txt";
+                 filePathString = "/home/aditya/Downloads/p2ptest.pdf";
                  groupName = "g1";
 
                 fp = fopen(filePathString.c_str(), "r");
@@ -292,28 +292,32 @@ int main(int argc, char ** argv){
                     break;
                 }
                 
-                std::cout << "Enter filename, filepath and groupname" << endl;
+                std::cout << "<-----------Inside the download thread------>" << endl;
                 
                 //cin >> baseFilenameString >> filePathString >> groupName;
 
                 // baseFilenameString = "sample-2mb-text-file.txt";
-                 filePathString = "/home/aditya/Downloads/message.txt";
+                filePathString = "/home/aditya/Downloads/p2ptest.pdf";
                 //filePathString = filePathString + "/" + baseFilenameString;
                  groupName = "g1";
                 baseFilenameString = basename(filePathString.c_str());
-                fileSize = to_string(ftell(fp));
+                //fileSize = to_string(ftell(fp));
 
                // totalMessage = ":" + DownloadFileCommand + ":" + baseFilenameString + ";" + fileSize + ";" + groupName;
                 
                 //totalMessage = to_string(totalMessage.size()) + totalMessage;
-               totalMessage = ":" + DownloadFileCommand + ":" + baseFilenameString + ";" + fileSize;
+                totalMessage = ":" + DownloadFileCommand + ":" + groupName + ";" + baseFilenameString;
                 totalMessage = to_string(totalMessage.size()) + totalMessage;
 
                 strcpy(message, totalMessage.c_str());
+                //cout<<"IN download"<<endl;
+               
+               
                 send(tracker_socket, message, strlen(message), 0);
                 recv(tracker_socket, &recvBuffer, sizeof(recvBuffer), 0);
 
-                tokens = tokenize(recvBuffer, ";", 1);
+                tokens = tokenize(recvBuffer, ";", 2);
+
 
                 if (tokens[0] != StatusOkCode){
                     cout << tokens[1] << endl;
@@ -322,7 +326,7 @@ int main(int argc, char ** argv){
 
                 fileSize = tokens[1];
 
-                cout << tokens[1] << endl;
+                cout << "file size to be downloaded is-->"<<tokens[1]<< endl;
 
                 writerLock(&FileMapSemaphore);
                     if (FileMap.find(baseFilenameString) == FileMap.end()){
@@ -344,10 +348,9 @@ int main(int argc, char ** argv){
                         
                 writerUnlock(&FileDownloadSemaphore);
 
-                // pthread_mutex_lock(&lock);
-                // FileMap[std::string(filePath)] = std::string(filePath);
-                // pthread_mutex_unlock(&lock);
+               
                 tokens = tokenize(tokens[2], ";", -2);
+               
                 pthread_mutex_lock(&userLock);
                     for (auto token: tokens){
                         cout << token << endl;
@@ -376,6 +379,7 @@ int main(int argc, char ** argv){
                             totalMessage = ":" + SendUsernameCommand + ":" + loggedInUser;
                             totalMessage = to_string(totalMessage.size()) + totalMessage;
                             send(UserDirectory[tokens2[0]]->currentSessionId, totalMessage.c_str(), totalMessage.size(), 0);
+                            cout<<"On line number 382 on up of getbitvector"<<endl;
                             totalMessage = ":" + GetBitVector + ":" + baseFilenameString;
                             totalMessage = to_string(totalMessage.size()) + totalMessage;
                             send(UserDirectory[tokens2[0]]->currentSessionId, totalMessage.c_str(), totalMessage.size(), 0);
